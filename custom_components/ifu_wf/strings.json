@@ -1,0 +1,42 @@
+{
+  "title": "IFU-WF",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to IFU-WF",
+        "description": "Enter the device credentials. Re-enter the password when updating credentials; leave both fields empty to disable authentication.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "host": "Host"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure IFU-WF",
+        "description": "Enter the device credentials. Re-enter the password when updating credentials; leave both fields empty to disable authentication.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "host": "Host"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Update IFU-WF credentials",
+        "description": "Enter the device credentials. Re-enter the password when updating credentials; leave both fields empty to disable authentication.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the air conditioner.",
+      "invalid_host": "Enter a hostname or IP address without http:// or a path.",
+      "invalid_auth": "Authentication failed. Check the device username and password."
+    },
+    "abort": {
+      "already_configured": "This air conditioner is already configured.",
+      "unique_id_mismatch": "This is a different device. Use the address and credentials of the existing air conditioner."
+    }
+  }
+}

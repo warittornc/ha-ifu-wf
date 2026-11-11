@@ -1,0 +1,18 @@
+# Real Home Assistant, isolated from any existing installation.
+homeassistant:
+  name: IFU-WF Staging
+
+frontend:
+config:
+api:
+history:
+logbook:
+system_health:
+
+recorder:
+  purge_keep_days: 3
+
+logger:
+  default: warning
+  logs:
+    custom_components.ifu_wf: debug

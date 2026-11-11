@@ -1,0 +1,454 @@
+<head>
+	<title>IFU-WF</title>
+	<script src="/mchp.js" type="text/javascript"></script>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link href="style.css" rel="stylesheet" type="text/css">
+<style>
+            *{margin: 0; padding: 0;}
+            nav{width: 100%;margin: auto;}
+            ul{list-style: none;}
+            ul li{ width: 200px; background: #fb4f56; float: left; height: 45px; line-height: 45px; text-align: center; margin-right: 2px; position: relative;}
+            ul li:hover{ background: #7a858b;}
+            ul li a{color: #fff; text-decoration: none; font-family: sans-serif; display: block;font-size:14px;font-weight: bold;}
+            ul li ul li{ border-top: 1px solid #fff;}
+            ul li ul{display: none;}
+            ul li:hover ul{ display: block;}
+            ul li ul .itam-2{position: absolute; left: 200px; top: 0; display: none;}
+            ul li ul li:last-child:hover .itam-2{display: block;}
+            section{width: 100%; margin: auto; clear: both; background: #e1e1e1;}
+}
+        </style>
+        <style type="text/css">
+        .tg {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+            .tg td {
+                font-family: Arial, sans-serif;
+                font-size: 16px;
+                font-weight: bold;
+                padding: 5px 5px;
+                border-style: solid;
+                border-width: 1px;
+                overflow: hidden;
+                word-break: normal;
+                border-color: black;
+            }
+
+            .tg th {
+                font-family: Arial, sans-serif;
+                font-size: 16px;
+                font-weight: bold;
+                padding: 3px 3px;
+                border-style: solid;
+                border-width: 0px;
+                overflow: hidden;
+                word-break: normal;
+                border-color: black;
+            }
+
+            .tg .tg-0pky {
+                border-color: inherit;
+                text-align: left;
+                vertical-align: top
+            }
+
+			.labelhead {
+                    color: #fff;
+                    text-decoration: none;
+                    font-family: sans-serif;
+                    font-size: 16px;
+                    font-weight: bold;}
+
+            .TextSty {
+				font-size: 1.4em;
+				font-weight: auto;
+				text-align: left;
+				color: #00E;
+			}
+	    .TextItm {
+				font-size: 1.2em;
+				font-weight: bold;
+				text-align: left;
+			}
+#menu2 {
+	float: center;
+	width: 180px;
+	padding-right: 20px;
+}
+
+#menu2 a {
+	width: 180px;
+	display: block;
+	background: #11BBFF;
+	color: black;
+	padding: 2px;
+	font-weight: bold;
+	border-bottom: 1px solid #fff;
+	text-decoration: none;
+}
+
+#menu2 a:hover {
+	background: #88CCFF;
+}
+
+#statusmoni {
+	width: 40px;
+	float: center;
+	border: 1px dotted #666;
+	font-weight: bold;
+}
+
+#statusmoni .leds {
+	font-family: auto;
+	font-size: 20pt;
+}
+
+#statusmoni .leds a {
+	color: #ddd;
+	cursor: pointer;
+}
+
+#statusmoni .leds a:hover {
+	color: #ddd;
+	text-decoration: none;
+}
+
+#status {
+	width: 30px;
+	float: right;
+	padding: 10px;
+	margin: 10px;
+	border: 1px dotted #666;
+	font-weight: bold;
+}
+
+#status p {
+	padding: 5px 0 5px 10px;
+	text-indent: -10px;
+	margin: 0;
+}
+
+#status .leds {
+	font-size: 35pt;
+}
+
+#status .leds a {
+	color: #ddd;
+	cursor: pointer;
+}
+
+#status .leds a:hover {
+	color: #ddd;
+	text-decoration: none;
+}
+    </style>
+</head>
+
+<body align=center>
+<div id="content" align=center>
+<table border="0" width=800  align=center>
+<tr><td>
+			<div id="statusmoni">
+			<div id="loading" ></div>
+			<div id="display">
+			</div>
+			</div>
+</td></tr>
+<tr align=center><td>
+	<TABLE border="1" width=800  align=center>
+	<tr align=center  bgcolor="#33cc00">
+		<td><a href="/index.htm"><input type="button" class="sm" style="width:100%;height=50px;font: bold 24px Arial;color: green;" value="Hostname"/></a></td></td>
+		<td><a href="/configure.htm"><input type="button" class="sm" style="width:100%;height=50px;font: bold 24px Arial;color: green;" value="Router"/></a></td></td>
+	</tr>
+	<tr align=center>
+		<td ><span class="TextSty">IFU-WF00112233 </span></td>
+		<td><span class="TextSty">TEST_NETWORK</span></td>
+	</tr>
+	</TABLE>
+</td></tr>
+<tr><td>
+<table border="0" width=800 heigth=200 align=center>
+<tr align=center><td>
+<TABLE border="1" width=100% align=center>
+<tr><td align=center><a href="/index.htm"><input type="button" class="sm" style="width:100%;height=50px;font: bold 24px Arial;color: BLUE;" value="IFU-WF Refresh Monitoring"/></a></td></tr>
+</TABLE>
+</td></tr>
+
+
+<tr align=center><td>
+<TABLE border="1" width=100% align=center>
+<tr align=center><td id="am1">
+<span class="TextItm">STATUS</span>
+</td>
+<td id="am2">
+<span class="TextItm">NET</span>
+</td>
+<td id="am3">
+<span class="TextItm">CN105</span>
+</td>
+<td align=center>
+<table>
+<tr align=center bgcolor="#CCFF00"><td><span class="TextItm">TempRoom[°C]</span></td></tr>
+<tr bgcolor="#b2b2b2"><td align=center><span class="TextItm">26</span></td></tr>
+</table>
+</td>
+<td align=center>
+<table>
+<tr align=center bgcolor="#CCFF00"><td><span class="TextItm">Capacity</span></td></tr>
+<tr align=center bgcolor="#b2b2b2"><td><span class="TextItm">12624&nbsp;BTU</span></td></tr>
+</table>
+</td>
+<td align=center>
+<table>
+<tr align=center bgcolor="#CCFF00"><td><span class="TextItm">ErrCode[Hex]</span></td></tr>
+<tr><td align=center id="am4"><span class="TextItm">8000</span></td></tr>
+</table>
+</td>
+</tr>
+</TABLE>
+</td></tr>
+
+</table>
+
+	<TABLE border="1" width=800  align=center>
+	<TR align=center bgcolor="#CCFF00">
+<td><b>ON/OFF</b></td>
+<td><b>VANE</b></td>
+<td><b>FAN SPEED</b></td>
+<td><b>TEMP[°C]</b></td>
+<td><b>MODE</b></td>
+	</TR>
+	<TR align=center>
+		<TD><span id="m0" class="TextSty">--</span></TD>
+		<TD><span id="m1" class="TextSty">--</span></TD>
+		<TD><span id="m2" class="TextSty">--</span></TD>
+		<TD><span id="m3" class="TextSty">--</span></TD>
+		<TD><span id="m4" class="TextSty">--</span></TD>
+	</TR>
+	</TABLE>
+</td></tr>
+<tr align=center><td high=10><span class="TextItm">------------------------------</span></td></tr>
+
+
+<tr align=center><td>
+<form method="post" action="/login/ifuwf.htm" name="config">
+<fieldset>
+<table border="0" width=800 heigth=200 align=center class="TextItm">
+<tr align=center bgcolor="#66CCFF">
+<td><b>ON/OFF</b></td>
+<td><b>VANE</b></td>
+<td><b>FAN SPEED</b></td>
+<td><b>TEMP[°C]</b></td>
+<td><b>MODE</b></td>
+</tr>
+<tr bgcolor="#FFCCFF" align=center>
+<td>
+<select name="ifu1"style="font: bold 24px Arial;color: blue;">
+<option value="1" >ON</option>
+<option value="0" SELECTED>OFF</option>
+</select>
+</td>
+<td>
+<script language="javascript">
+  function Getvane(ena)
+  {
+	if(ena==1){
+		document.write('<select name="ifu2"style="font: bold 24px Arial;color: blue;">')
+		document.write('<option value="0" >AUTO</option>')
+		document.write('<option value="1" SELECTED>P1</option>')
+		document.write('<option value="2" >P2</option>')
+		document.write('<option value="3" >P3</option>')
+		document.write('<option value="4" >P4</option>')
+		document.write('<option value="5" >P5</option>')
+		document.write('<option value="7" >Swing</option>')
+		document.write('</select>')
+	}
+  }
+ //%%%%%%%%%%
+	Getvane(1);
+ //%%%%%%%%%%
+</script>
+</td>
+<td>
+<select name="ifu3"style="font: bold 24px Arial;color: blue;">  <!-- AUTO, Quiet, Low, Powerfull, SupperPowerfull => 0, 2, 3, 5, 6 -->
+<script language="javascript">
+  function Getfspeed(ena)
+  {
+	if(ena==1){
+		document.write('<option value="0" >AUTO</option>')
+		document.write('<option value="2" SELECTED>LOW</option>')
+		document.write('<option value="3" >MID1</option>')
+		document.write('<option value="5" >MID2</option>')
+		document.write('<option value="6" >HI</option>')
+	}else{
+		document.write('<option value="0" >AUTO</option>')
+		document.write('<option value="2" SELECTED>LOW</option>')
+		document.write('<option value="5" >MID</option>')
+		document.write('<option value="6" >HI</option>')
+	}
+  }
+ //%%%%%%%%%%
+	Getfspeed(1);
+ //%%%%%%%%%%
+</script>
+</select>
+</td>
+<td>
+
+<select name="ifu4"style="font: bold 24px Arial;color: blue;">  <!-- 20 C = 200 ACTempGet(T)  => 16.0 ... 31.5 -->
+<script language="javascript">
+  function Gettemp(ena)
+  {
+	if(ena==1){
+		document.write('<option value="160" >16.0</option>')
+		document.write('<option value="165" >16.5</option>')
+		document.write('<option value="170" >17.0</option>')
+		document.write('<option value="175" >17.5</option>')
+		document.write('<option value="180" >18.0</option>')
+		document.write('<option value="185" >18.5</option>')
+		document.write('<option value="190" >19.0</option>')
+		document.write('<option value="195" >19.5</option>')
+		document.write('<option value="200" >20.0</option>')
+		document.write('<option value="205" >20.5</option>')
+		document.write('<option value="210" >21.0</option>')
+		document.write('<option value="215" >21.5</option>')
+		document.write('<option value="220" >22.0</option>')
+		document.write('<option value="225" >22.5</option>')
+		document.write('<option value="230" >23.0</option>')
+		document.write('<option value="235" >23.5</option>')
+		document.write('<option value="240" >24.0</option>')
+		document.write('<option value="245" >24.5</option>')
+		document.write('<option value="250" SELECTED>25.0</option>')
+		document.write('<option value="255" >25.5</option>')
+		document.write('<option value="260" >26.0</option>')
+		document.write('<option value="265" >26.5</option>')
+		document.write('<option value="270" >27.0</option>')
+		document.write('<option value="275" >27.5</option>')
+		document.write('<option value="280" >28.0</option>')
+		document.write('<option value="285" >28.5</option>')
+		document.write('<option value="290" >29.0</option>')
+		document.write('<option value="295" >29.5</option>')
+		document.write('<option value="300" >30.0</option>')
+		document.write('<option value="305" >30.5</option>')
+		document.write('<option value="310" >31.0</option>')
+		document.write('<option value="315" >31.5</option>')
+	}else{
+		document.write('<option value="160" >16.0</option>')
+		document.write('<option value="170" >17.0</option>')
+		document.write('<option value="180" >18.0</option>')
+		document.write('<option value="190" >19.0</option>')
+		document.write('<option value="200" >20.0</option>')
+		document.write('<option value="210" >21.0</option>')
+		document.write('<option value="220" >22.0</option>')
+		document.write('<option value="230" >23.0</option>')
+		document.write('<option value="240" >24.0</option>')
+		document.write('<option value="250" SELECTED>25.0</option>')
+		document.write('<option value="260" >26.0</option>')
+		document.write('<option value="270" >27.0</option>')
+		document.write('<option value="280" >28.0</option>')
+		document.write('<option value="290" >29.0</option>')
+		document.write('<option value="300" >30.0</option>')
+		document.write('<option value="310" >31.0</option>')
+	}
+  }
+ //%%%%%%%%%%
+	Gettemp(0);
+ //%%%%%%%%%%
+</script>
+</select>
+
+
+
+</td>
+<td>
+
+<select name="ifu5"style="font: bold 24px Arial;color: blue;">  <!--  HEAT, DRY, COOL, FAN, AUTO => 1, 2, 3, 7, 8 -->
+<script language="javascript">
+  function Getmode(enauto,enheat)
+  {
+	if(enheat==1){
+		document.write('<option value="1" >HEAT</option>')
+	}
+		document.write('<option value="2" >DRY</option>')
+		document.write('<option value="3" SELECTED>COOL</option>')
+		document.write('<option value="7" >FAN</option>')
+	if(enauto==1){
+		document.write('<option value="8" >AUTO</option>')
+	}
+  }
+ //%%%%%%%%%%
+	Getmode(1,0);
+ //%%%%%%%%%%
+</script>
+</select>
+
+</td>
+</tr>
+<tr height="8">
+<Script Language="JavaScript">/*<![CDATA[*/for(i=0;i<5;i++){document.write('<td bgcolor="blue"></td>')};/*]]>*/</script>
+</tr>
+<TABLE border="1" width=100% align=center>
+<tr align=center><td><input type="submit" class="sm" style="width:100%;height=50px;font: bold 24px Arial;color: green;" value="Update Remote Setting  ==>  IFU-WF"/></td></tr>
+</TABLE>
+</fieldset>
+</form>
+</td></tr>
+<tr align=center><td>
+<table align=center width=800>
+	<tr align=center><td align=center bgcolor="#e7f4fe"  height="15">Copyright &copy; 2019 Electronic Technology Research, Inc.</td></tr>
+</table>
+</td></tr>
+</table>
+<!------------------------------------------------------------------------------->
+</div>
+
+<script type="text/javascript">
+//******************************************************************
+function Get_mAddr(k,z,xmlData) {
+	for(i = k; i < (k+z); i++){
+		S1 = getXMLValue(xmlData, 'm' + i);
+		document.getElementById('m' + i).innerHTML = S1;          //e.toString();  e.length();
+	}
+}
+
+function Get_amAddr(k,z,xmlData) {
+	for(i = k; i < (k+z); i++){
+		s = getXMLValue(xmlData, 'am' + i);
+		switch(s){
+			case '2' : document.getElementById('am'+i).style.backgroundColor  =  'RED'; break;
+			default : document.getElementById('am'+i).style.backgroundColor = (s == '1') ? '#009900' : '#c0c0c0';
+		}
+	}
+}
+
+//<!--
+// Parses the xmlResponse from status.xml and updates the status box
+function updateMoni(xmlData) {
+	var mainstat = document.getElementById('display').style.display;
+	var loadstat = document.getElementById('loading').style.display;
+
+	// Check if a timeout occurred
+	if(!xmlData)
+	{
+		mainstat = 'none';
+		loadstat = 'inline';
+		return;
+	}
+
+	// Make sure we're displaying the status display
+	mainstat = 'inline';
+	loadstat = 'none';
+//**************  LED In Module XML ******************
+	//Get_LedAddr(1,3,xmlData);				// Get XML For LED Built In Function led0  Status LED
+	Get_amAddr(1,4,xmlData);
+//**************  Built In Module XML ******************
+    Get_mAddr(0,5,xmlData);				// Get XML For Built In Function m0..m4  IFU-WF
+	//Get_mAddr(299,2,xmlData);				// Get XML For Built In Function m297..m300  Get RTC Date/Time
+}
+setTimeout("newAJAXCommand('stamon.xml', updateMoni, true)",1000);
+//-->
+</script>
+</body>
+</html>
