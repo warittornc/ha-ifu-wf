@@ -1,8 +1,8 @@
 # ha-ifu-wf
 
 Home Assistant custom integration for local HTTP control of IFU-WF air
-conditioner Wi-Fi modules. Provides a climate entity with power, target and room
-temperature, operating mode, fan speed, and vane position.
+conditioner Wi-Fi modules. Provides a climate entity with power, target temperature, operating mode, fan
+speed, and vane position. Room temperature is not reported.
 
 **Status: implemented and tested locally; live reads and a container staging
 instance verified. Live command coverage is still limited.**
@@ -25,7 +25,7 @@ The device uses plain HTTP, so Basic authentication is not encrypted in transit.
 
 Home Assistant must be able to reach the device on port 80. Supported modes,
 fan speeds, temperature range and vane positions are detected from the device.
-State is refreshed every 30 seconds. See [protocol notes](docs/device-protocol.md).
+State is refreshed every 30 seconds from the small `stamon.xml` status file. See [protocol notes](docs/device-protocol.md).
 
 ## Development
 

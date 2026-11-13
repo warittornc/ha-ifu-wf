@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from custom_components.ifu_wf.api import parse_state
+from custom_components.ifu_wf.api import parse_device, parse_status
 
 
 @pytest.fixture
@@ -18,5 +18,10 @@ def status():
 
 
 @pytest.fixture
-def state(page, status):
-    return parse_state(page, status)
+def device(page):
+    return parse_device(page)
+
+
+@pytest.fixture
+def state(device, status):
+    return parse_status(status, device)

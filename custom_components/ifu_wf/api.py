@@ -4,7 +4,6 @@ import asyncio
 import math
 import re
 from dataclasses import dataclass
-from html import unescape
 from ipaddress import ip_address
 from xml.etree import ElementTree
 
@@ -13,6 +12,7 @@ from yarl import URL
 
 PAGE = "/login/ifuwf.htm"
 STATUS = "/login/stamon.xml"
+PAGE_ATTEMPTS = 3
 MODES = {"HEAT": "1", "DRY": "2", "COOL": "3", "FAN": "7", "AUTO": "8"}
 VANES = {
     "AUTO": "0",
@@ -64,11 +64,18 @@ class Capabilities:
 
 
 @dataclass(frozen=True)
+class Device:
+    """Fixed identity and capabilities, read once from the control page."""
+
+    device_id: str
+    capabilities: Capabilities
+
+
+@dataclass(frozen=True)
 class DeviceState:
     """Confirmed device state, never an optimistic command result."""
 
     device_id: str
-    current_temperature: float
     target_temperature: float
     power: bool
     mode: str
@@ -77,8 +84,8 @@ class DeviceState:
     capabilities: Capabilities
 
 
-def parse_state(page: str, status: str) -> DeviceState:
-    """Parse the observed IFU-WF firmware format; reject unknown layouts."""
+def parse_device(page: str) -> Device:
+    """Parse identity and capability flags; reject unknown or truncated pages."""
     try:
         identity = re.search(r"\bIFU-WF[0-9A-Fa-f]{8}\b", page)
         if identity is None:
@@ -89,8 +96,12 @@ def parse_state(page: str, status: str) -> DeviceState:
             if match is None:
                 raise ValueError(f"Missing capability flag {name}")
             flags[name] = tuple(int(value) for value in match[1].split(","))
-        auto, heat = flags["Getmode"]
-        capabilities = Capabilities(
+    except ValueError as err:
+        raise IfuWfError(f"Invalid IFU-WF response: {err}") from err
+    auto, heat = flags["Getmode"]
+    return Device(
+        identity[0].upper(),
+        Capabilities(
             modes=tuple(
                 mode
                 for mode in MODES
@@ -108,13 +119,14 @@ def parse_state(page: str, status: str) -> DeviceState:
                     5 if flags["Gettemp"] == (1,) else 10,
                 )
             ),
-        )
-        # Room temperature is server-rendered, not present in stamon.xml.
-        visible = re.sub(r"<script\b.*?</script>", "", page, flags=re.S | re.I)
-        visible = unescape(re.sub(r"<[^>]+>", " ", visible))
-        room = re.search(r"TempRoom\[°C\]\s+(-?\d+(?:\.\d+)?)", visible)
-        if room is None:
-            raise ValueError("Missing room temperature")
+        ),
+    )
+
+
+def parse_status(status: str, device: Device) -> DeviceState:
+    """Parse stamon.xml against the device's capabilities."""
+    capabilities = device.capabilities
+    try:
         if "<!" in status:
             raise ValueError("XML declarations/entities are not supported")
         root = ElementTree.fromstring(status)
@@ -123,6 +135,7 @@ def parse_state(page: str, status: str) -> DeviceState:
         values = [(root.findtext(f"m{i}") or "").strip() for i in range(5)]
         power, vane, fan, temperature, mode = values
         target = float(temperature)
+        # m4 keeps the last operating mode while power is OFF.
         if (
             power not in ("ON", "OFF")
             or mode not in capabilities.modes
@@ -136,18 +149,17 @@ def parse_state(page: str, status: str) -> DeviceState:
         indicator = root.findtext("am3")
         if indicator is None or indicator.strip() not in ("", "1"):
             raise ValueError("CN105 connection is unavailable")
-        return DeviceState(
-            identity[0].upper(),
-            float(room[1]),
-            target,
-            power == "ON",
-            mode,
-            fan,
-            vane,
-            capabilities,
-        )
     except (ValueError, ElementTree.ParseError) as err:
         raise IfuWfError(f"Invalid IFU-WF response: {err}") from err
+    return DeviceState(
+        device.device_id,
+        target,
+        power == "ON",
+        mode,
+        fan,
+        vane,
+        capabilities,
+    )
 
 
 class IfuWfClient:
@@ -162,6 +174,7 @@ class IfuWfClient:
         self.host = normalize_host(host)
         self._base = URL.build(scheme="http", host=self.host)
         self._lock = asyncio.Lock()
+        self._device: Device | None = None
         self._headers = (
             {"Authorization": encode_basic_auth(username, password)} if username else {}
         )
@@ -192,10 +205,23 @@ class IfuWfClient:
         except (ClientError, TimeoutError, UnicodeError) as err:
             raise IfuWfError(f"Device request failed: {err}") from err
 
+    async def _get_device(self) -> Device:
+        """Fetch the large control page once; it is often cut off mid-response."""
+        if self._device is None:
+            for attempt in range(PAGE_ATTEMPTS):
+                try:
+                    self._device = parse_device(await self._request("GET", PAGE))
+                    break
+                except IfuWfAuthError:
+                    raise
+                except IfuWfError:
+                    if attempt == PAGE_ATTEMPTS - 1:
+                        raise
+        return self._device
+
     async def _read(self) -> DeviceState:
-        page = await self._request("GET", PAGE)
-        status = await self._request("GET", STATUS)
-        return parse_state(page, status)
+        device = await self._get_device()
+        return parse_status(await self._request("GET", STATUS), device)
 
     async def async_get_state(self) -> DeviceState:
         async with self._lock:

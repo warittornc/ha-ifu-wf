@@ -13,7 +13,8 @@ from custom_components.ifu_wf.api import (
     IfuWfClient,
     IfuWfError,
     normalize_host,
-    parse_state,
+    parse_device,
+    parse_status,
 )
 
 
@@ -40,7 +41,8 @@ def test_reject_non_host_input(value):
 def test_capture(state):
     assert state.device_id == "IFU-WF00112233"
     assert not state.power
-    assert (state.current_temperature, state.target_temperature) == (26, 25)
+    assert state.target_temperature == 25
+    assert state.mode == "COOL"  # last mode is reported while OFF
     assert state.capabilities.modes == ("DRY", "COOL", "FAN", "AUTO")
     assert state.capabilities.temperatures == tuple(range(16, 32))
     assert state.capabilities.fans == ("AUTO", "LOW", "MID1", "MID2", "HI")
@@ -55,28 +57,36 @@ def test_capture(state):
         "<!DOCTYPE response><response/>",
     ],
 )
-def test_invalid_status(page, replacement):
+def test_invalid_status(device, replacement):
     with pytest.raises(IfuWfError):
-        parse_state(page, replacement)
+        parse_status(replacement, device)
 
 
 @pytest.mark.parametrize(
     ("before", "after"),
     [("<am3>1", "<am3>0"), ("<m4>COOL", "<m4>HEAT"), ("25.0", "25.5")],
 )
-def test_unavailable_or_unsupported(page, status, before, after):
+def test_unavailable_or_unsupported(device, status, before, after):
     with pytest.raises(IfuWfError):
-        parse_state(page, status.replace(before, after))
+        parse_status(status.replace(before, after), device)
 
 
-def test_invalid_page(status):
+@pytest.mark.parametrize("flag", ["Getfspeed(", "Gettemp(", "Getmode("])
+def test_truncated_page_rejected(page, flag):
+    # Cut before the flag's call, which follows its function definition.
     with pytest.raises(IfuWfError):
-        parse_state("<html>Sign in</html>", status)
+        parse_device(page[: page.rindex(flag)])
+
+
+def test_invalid_page():
+    with pytest.raises(IfuWfError):
+        parse_device("<html>Sign in</html>")
 
 
 class Firmware:
     def __init__(self, page, status):
         self.page, self.xml = page, status
+        self.pages = []
         self.calls = []
         self.http_status = 200
 
@@ -98,7 +108,10 @@ class Firmware:
                 + "".join(f"<m{i}>{v}</m{i}>" for i, v in enumerate(labels))
                 + "</response>"
             )
-        body = self.page if url.path == PAGE else self.xml
+        if url.path == PAGE:
+            body = self.pages.pop(0) if self.pages and method == "GET" else self.page
+        else:
+            body = self.xml
 
         async def chunks(size):
             yield body.encode()
@@ -130,9 +143,48 @@ async def test_real_request_shape_and_preserved_fields(page, status):
         ("GET", PAGE),
         ("GET", STATUS),
         ("POST", PAGE),
-        ("GET", PAGE),
         ("GET", STATUS),
     ]
+
+
+async def test_polls_read_only_status_after_first_page(page, status):
+    transport = Firmware(page, status)
+    client = IfuWfClient(transport, "ac.local")
+    for _ in range(3):
+        await client.async_get_state()
+    assert [call[:2] for call in transport.calls] == [
+        ("GET", PAGE),
+        ("GET", STATUS),
+        ("GET", STATUS),
+        ("GET", STATUS),
+    ]
+
+
+async def test_truncated_page_is_retried(page, status):
+    transport = Firmware(page, status)
+    transport.pages = [
+        page[: page.rindex("Getfspeed(")],
+        page[: page.rindex("Getmode(")],
+    ]
+    state = await IfuWfClient(transport, "ac.local").async_get_state()
+    assert state.device_id == "IFU-WF00112233"
+    assert [call[1] for call in transport.calls] == [PAGE, PAGE, PAGE, STATUS]
+
+
+async def test_page_retries_are_bounded(page, status):
+    transport = Firmware(page, status)
+    transport.pages = [page[: page.rindex("Getfspeed(")]] * 3
+    with pytest.raises(IfuWfError):
+        await IfuWfClient(transport, "ac.local").async_get_state()
+    assert [call[1] for call in transport.calls] == [PAGE] * 3
+
+
+async def test_turn_on_keeps_last_mode(page, status):
+    transport = Firmware(page, status.replace("COOL", "DRY"))
+    result = await IfuWfClient(transport, "ac.local").async_set(power=True)
+    post = next(call for call in transport.calls if call[0] == "POST")
+    assert (post[2]["data"]["ifu1"], post[2]["data"]["ifu5"]) == ("1", "2")
+    assert (result.power, result.mode) == (True, "DRY")
 
 
 async def test_commands_are_serialized(page, status):
@@ -196,8 +248,10 @@ async def test_no_credentials_omit_authentication(page, status):
 
 
 @pytest.mark.parametrize("indicator", ["", " "])
-def test_empty_indicator_with_valid_state_stays_available(page, status, indicator):
-    state = parse_state(page, status.replace("<am3>1</am3>", f"<am3>{indicator}</am3>"))
+def test_empty_indicator_with_valid_state_stays_available(device, status, indicator):
+    state = parse_status(
+        status.replace("<am3>1</am3>", f"<am3>{indicator}</am3>"), device
+    )
     assert state.mode == "COOL"
     assert state.target_temperature == 25
 

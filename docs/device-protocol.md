@@ -2,8 +2,10 @@
 
 Sanitized firmware responses are in `tests/fixtures/`.
 
-- `GET /login/ifuwf.htm`: module identity, room temperature and capability flags.
-- `GET /login/stamon.xml`: XML status rooted at `response`.
+- `GET /login/ifuwf.htm`: module identity and capability flags. Read once per
+  setup (up to three attempts: the firmware often closes this ~14 KB page early
+  with HTTP 200 and no `Content-Length`). Room temperature is also here but unused.
+- `GET /login/stamon.xml`: XML status rooted at `response`; the only request polled.
 - `POST /login/ifuwf.htm`: URL-encoded control form.
 - Optional HTTP Basic authentication; HTTP 401/403 triggers reauthentication.
 
@@ -13,7 +15,7 @@ Sanitized firmware responses are in `tests/fixtures/`.
 | `m1` | Vane position |
 | `m2` | Fan speed |
 | `m3` | Target temperature in °C |
-| `m4` | Operating mode |
+| `m4` | Operating mode; keeps the last mode while power is OFF |
 | `am3` | CN105 indicator: `1` or empty accepted; other values rejected |
 
 | Form field | Encoding |
@@ -25,8 +27,8 @@ Sanitized firmware responses are in `tests/fixtures/`.
 | `ifu5` | Mode: HEAT=1, DRY=2, COOL=3, FAN=7, AUTO=8 |
 
 Active `Getvane`, `Getfspeed`, `Gettemp` and `Getmode` flags determine supported
-settings. Each command reads current state, preserves unchanged fields, posts
-the complete form, then reads state back. Reads and commands are serialized.
+settings. Each command reads `stamon.xml`, preserves unchanged fields, posts
+the complete form, then reads `stamon.xml` back. Turning on without a mode keeps `m4`. Reads and commands are serialized.
 Requests time out after ten seconds; redirects and automatic write retries are
 disabled. Polling runs every 30 seconds.
 
