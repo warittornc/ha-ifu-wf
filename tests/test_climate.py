@@ -21,7 +21,7 @@ def climate(state):
 
 def test_properties(climate):
     assert climate.hvac_mode == HVACMode.OFF
-    assert climate.native_current_temperature == 26
+    assert climate.current_temperature is None
     assert climate.native_target_temperature == 25
     assert climate.native_temperature_unit == "°C"
     assert climate.min_temp == 16

@@ -79,10 +79,6 @@ class IfuWfClimate(CoordinatorEntity[IfuWfCoordinator], ClimateEntity):
         return MODE_TO_HA[state.mode] if state.power else HVACMode.OFF
 
     @property
-    def native_current_temperature(self) -> float:
-        return self.coordinator.data.current_temperature
-
-    @property
     def native_target_temperature(self) -> float:
         return self.coordinator.data.target_temperature
 
